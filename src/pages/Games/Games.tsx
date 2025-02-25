@@ -9,6 +9,7 @@ interface Games {
 
 const gameTitles: string[] = [
     'Naughts and Crosses',
+    'Connect 4'
 ] 
 
 const games: Games[] = gameTitles.map(game => ({

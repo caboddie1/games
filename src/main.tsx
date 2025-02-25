@@ -7,7 +7,7 @@ import Games from './pages/Games';
 import Game from './pages/Game.tsx';
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+	<StrictMode>
 		<BrowserRouter>
 			<Routes>
 				<Route 
@@ -25,5 +25,5 @@ createRoot(document.getElementById('root')!).render(
 				</Route>
 			</Routes>
 		</BrowserRouter>
-  </StrictMode>,
+	</StrictMode>,
 )

@@ -1,11 +1,6 @@
-import React from "react";
 import NaughtsAndCrosses from "../components/NaughtsAndCrosses"
-import { useNavigate, useParams } from "react-router";
-
-type Games = Map<string, {
-    title: string;
-    component: React.ReactNode;
-}>;
+import { useParams } from "react-router";
+import ConnectFour from "../components/ConnectFour";
 
 const games = new Map([
     [
@@ -14,13 +9,19 @@ const games = new Map([
             title: 'Naughts and Crosses',
             component: <NaughtsAndCrosses />
         }
+    ],
+    [
+        'connect-4',
+        {
+            title: 'Connect 4',
+            component: <ConnectFour />
+        }
     ]
 ])
 
 export default function Game() {
 
     const { id } = useParams();
-    const navigate = useNavigate();
     const game = games.get(id || '');
 
 
