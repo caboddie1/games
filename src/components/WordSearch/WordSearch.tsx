@@ -1,17 +1,10 @@
 import { CoordinateObj, Tuple } from "../../hooks/grid"
-import { getSelectedCoordinates, getWordLength, HighlightItem, populateGrid, WordState } from "../../utils/wordSearch";
+import { HighlightItem, WordState } from "../../utils/wordSearch";
 import { useState } from "react";
 import { Button, Col, Row } from "reactstrap";
 import Grid from "./Grid";
 import WordList from "./WordList";
-
-const gridSize = { rows: 15 as 15, columns: 15 as 15 };
-
-
-const blankGrid = [ ...Array(gridSize.rows) ].map(() => {
-    return [ ...Array(gridSize.columns) ].map(() => null);
-})
-
+import { WordSearch as _WordSearch } from "../../utils/wordSearch";
 
 export interface GridState {
     grid: Tuple<Tuple<string | null, number>, number>;
@@ -26,7 +19,13 @@ export interface HighlightState {
 
 export default function WordSearch() {
 
-    const [gridState, setGridState] = useState<GridState>(populateGrid(blankGrid, { x: 15, y: 15 }));
+    function initState() {
+        const wordSearch = new _WordSearch();
+        return wordSearch.getState();
+    }
+
+    const [gridState, setGridState] = useState<GridState>(initState);
+
     const [foundState, setFoundState] = useState<WordState[]>([]);
     const [highlightState, setHighlightState] = useState<HighlightState>({ start: null, coords: null });
 
@@ -47,7 +46,7 @@ export default function WordSearch() {
                 start: coords
             });
         } else {
-            const selectedCoordinates = getSelectedCoordinates(highlightState.start, coords)?.coords;
+            const selectedCoordinates = _WordSearch.getSelectedCoordinates(highlightState.start, coords)?.coords;
             if (!selectedCoordinates) {
                 setHighlightState({
                     start: null,
@@ -55,8 +54,8 @@ export default function WordSearch() {
                 })
                 return;
             };
-
-            const wordLength = getWordLength(highlightState.start, coords);
+            
+            const wordLength = _WordSearch.getWordLength(highlightState.start, coords);
             const wordMatch = gridState.words
                 .filter(row => row.word.length === wordLength)
                 .find(row => {
@@ -73,33 +72,6 @@ export default function WordSearch() {
                 coords: null
             })
         }
-
-        /*if (startRef.current === null) {
-            startRef.current = coords;
-        } else {
-            console.log(`startRef is not null`)
-            const selectedCoordinates = getSelectedCoordinates(startRef.current, coords)?.coords;
-            console.log(selectedCoordinates)
-            if (!selectedCoordinates) {
-                return startRef.current = null;
-            };
-
-            const wordLength = getWordLength(startRef.current, coords);
-            console.log('word length: ', wordLength)
-
-            const wordMatch = gridState.words
-                .filter(row => row.word.length === wordLength)
-                .find(row => {
-                    return row.coords.every(({ x, y }, i) => {
-                        return x === selectedCoordinates[i].x && y === selectedCoordinates[i].y;
-                    })
-                });
-
-            if (wordMatch && !foundState.map(r => r.word).includes(wordMatch.word)) {
-                setFoundState(currentState => [ ...currentState, wordMatch ]);
-            }
-            startRef.current = null;
-        }*/
     }
 
     function getIsFound(word: string) {
@@ -108,7 +80,7 @@ export default function WordSearch() {
 
     function onSquareHover(coords: CoordinateObj) {
         if (highlightState.start) {
-            const highlightedCoordinates = getSelectedCoordinates(highlightState.start, coords);
+            const highlightedCoordinates = _WordSearch.getSelectedCoordinates(highlightState.start, coords);
             setHighlightState(state => ({
                 ...state,
                 coords: highlightedCoordinates
@@ -117,7 +89,7 @@ export default function WordSearch() {
     }
 
     function onResetClick() {
-        setGridState(populateGrid(blankGrid, { x: 15, y: 15 }));
+        setGridState(initState());
         setFoundState([]);
     }
 

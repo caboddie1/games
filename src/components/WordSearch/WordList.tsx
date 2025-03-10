@@ -7,7 +7,7 @@ interface Props {
 
 export default function WordList({ gridState, getIsFound }: Props) {
     return (
-        <div>
+        <div data-testid="word-list">
             {gridState.words.map(item => (
                 <div 
                     key={item.word} 
