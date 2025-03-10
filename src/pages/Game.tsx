@@ -1,6 +1,7 @@
 import NaughtsAndCrosses from "../components/NaughtsAndCrosses"
 import { useParams } from "react-router";
 import ConnectFour from "../components/ConnectFour";
+import WordSearch from "../components/WordSearch";
 
 const games = new Map([
     [
@@ -15,6 +16,13 @@ const games = new Map([
         {
             title: 'Connect 4',
             component: <ConnectFour />
+        }
+    ],
+    [
+        'word-search',
+        {
+            title: 'Word Search',
+            component: <WordSearch />
         }
     ]
 ])

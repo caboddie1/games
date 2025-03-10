@@ -3,9 +3,10 @@ import { useState } from "react";
 
 export type Tuple<TItem, TLength extends number> = [ ...TItem[] ] & { length: TLength }
 
-export interface Props<TRow = number, TColumn = number> {
+export interface Props<TRow extends number = number, TColumn extends number = number, TData = null> {
     rows: TRow;
     columns: TColumn;
+    initialState?: () => Tuple<Tuple<TData | null, TRow>, TColumn>;
 }
 
 export interface CoordinateObj {
@@ -19,13 +20,14 @@ export function useGrid<
     TData 
 >({ 
     rows, 
-    columns 
+    columns,
+    initialState
 }: Props<TRow, TColumn>) {
 
     type Row = Tuple<TData | null, TRow>;
     type Grid = Tuple<Row, TColumn>;
 
-    function generateInitialState(): Grid {
+    function generateDefaultInitialState(): Grid {
         return Array.from({ length: rows }, () => {
             return Array.from({ length: columns }, () => {
                 return null;
@@ -33,7 +35,7 @@ export function useGrid<
         }) as Grid;
     }
 
-    const [grid, setGrid] = useState<Grid>(generateInitialState);
+    const [grid, setGrid] = useState<Grid>(initialState ? initialState : generateDefaultInitialState);
 
     function isGridItemAvailable({ x, y }: CoordinateObj) {
         return grid[y][x] === null;
@@ -47,15 +49,22 @@ export function useGrid<
         return newState;
     }
 
+    function bulkUpdate(grid: Grid) {
+        const newState = JSON.parse(JSON.stringify(grid));
+        setGrid(newState);
+        return newState;
+    }
+
     function resetGrid() {
-        setGrid(generateInitialState());
+        setGrid(initialState ? initialState() : generateDefaultInitialState());
     }
 
     return {
         grid,
         setGrid,
-        generateInitialState,
+        generateInitialState : initialState ? initialState : generateDefaultInitialState,
         updateGrid,
+        bulkUpdate,
         isGridItemAvailable,
         resetGrid
     }
