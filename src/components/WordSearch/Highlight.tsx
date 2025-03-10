@@ -11,7 +11,6 @@ type RotateTable = {
 }
 
 const Highlight = styled('div')<Props>(({ wordState, baseSize }) => {
-    console.log(wordState)
     const startPos = wordState.coords[0];
 
     const height = wordState.direction === 'vertical' ? wordState.word.length * baseSize : baseSize - 10;

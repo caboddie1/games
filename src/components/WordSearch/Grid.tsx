@@ -38,6 +38,7 @@ export default function Grid({
                             className="border m-0"
                             onClick={() => onSquareClick({ x, y })}
                             onMouseOver={() => onSquareHover({ x, y })}
+                            aria-label={`y${y}x${x}`}
                         >
                             {column}
                         </Square>
