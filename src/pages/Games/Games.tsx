@@ -8,7 +8,7 @@ interface Games {
 }
 
 const gameTitles: string[] = [
-    'Naughts and Crosses',
+    'Noughts and Crosses',
     'Connect 4',
     'Word Search'
 ] 
@@ -33,7 +33,7 @@ export default function Games() {
                     </Link>
                 ))}
             </Nav>
-            <Container style={{ marginLeft: 230 }}>
+            <Container style={{ paddingLeft: 130 }}>
                 <Outlet />
             </Container>
         </div>

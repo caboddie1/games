@@ -1,13 +1,13 @@
-import NaughtsAndCrosses from "../components/NaughtsAndCrosses"
+import NaughtsAndCrosses from "../components/NoughtsAndCrosses"
 import { useParams } from "react-router";
 import ConnectFour from "../components/ConnectFour";
 import WordSearch from "../components/WordSearch";
 
 const games = new Map([
     [
-        'naughts-and-crosses', 
+        'noughts-and-crosses', 
         {
-            title: 'Naughts and Crosses',
+            title: 'Noughts and Crosses',
             component: <NaughtsAndCrosses />
         }
     ],

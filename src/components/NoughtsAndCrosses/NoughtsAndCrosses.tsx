@@ -13,7 +13,8 @@ import { getCombos } from "../../utils/gridCombo";
 
 const winningCombos = getCombos({ rows: 3, columns: 3, streak: 3 });
 
-export default function NaughtsAndCrosses() {
+export default function NoughtsAndCrosses() {
+
 
     const { grid, updateGrid, resetGrid, isGridItemAvailable } = useGrid<3, 3, GamePiece>({ rows: 3, columns: 3 }) 
 
@@ -77,6 +78,7 @@ export default function NaughtsAndCrosses() {
                                     className="border"
                                     isAvailable={!win && isGridItemAvailable({ x, y })}
                                     onClick={() => !win ? onGridItemClick(x as Coordinate, y as Coordinate) : null}
+                                    aria-label={`y${y}x${x}`}
                                 >
                                     {item || ''}
                                 </GridItem>

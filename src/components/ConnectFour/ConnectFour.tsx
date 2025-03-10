@@ -76,6 +76,7 @@ export default function ConnectFour() {
                             key={`row-${rowI}-column${columnI}`}
                             className="border py-1"
                             onClick={() => win ? null : onItemClick(columnI)}
+                            aria-label={`y${rowI}x${columnI}`}
                         >
                             <Circle 
                                 gamePiece={column}

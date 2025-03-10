@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import NaughtsAndCrosses from "./components/NaughtsAndCrosses/NaughtsAndCrosses"
+import NaughtsAndCrosses from "./components/NoughtsAndCrosses/NoughtsAndCrosses"
 import { useLocation, useNavigate } from 'react-router';
 
 
