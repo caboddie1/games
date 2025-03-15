@@ -1,11 +1,12 @@
-import styled, { CSSObject } from "@emotion/styled";
-import { Link, Outlet } from "react-router";
+import { useSelector } from "react-redux";
+import { Outlet } from "react-router";
 import { Container } from "reactstrap";
 
-interface Games {
-    slug: string;
-    title: string;
-}
+import { Nav, MobileNav, NavLink } from "@/components/Nav";
+
+import { Breakpoint } from "@/utils/breakpoint";
+import { RootState } from "@/state/store";
+
 
 const gameTitles: string[] = [
     'Noughts and Crosses',
@@ -13,42 +14,31 @@ const gameTitles: string[] = [
     'Word Search'
 ] 
 
-const games: Games[] = gameTitles.map(game => ({
+const games: NavLink[] = gameTitles.map(game => ({
     title: game,
     slug: game.toLowerCase().split(' ').join('-')
 }))
 
 export default function Games() {
 
+    const breakpointState = useSelector((state: RootState) => state.breakpoint.value)
+    const breakpoint = new Breakpoint(breakpointState);
+
     return (
         <div>
-            <Nav className="pt-5">
-                {games.map(game => (
-                    <Link
-                        className="ps-2"
-                        key={game.slug}
-                        to={`/games/${game.slug}`}
-                    >
-                        {game.title}
-                    </Link>
-                ))}
-            </Nav>
-            <Container style={{ paddingLeft: 130 }}>
+            {breakpoint.isAbove('sm') ?
+                <Nav 
+                    links={games}
+                />
+            :
+                <MobileNav
+                    links={games}
+                />
+            }
+            <Container fluid style={{ paddingLeft: breakpoint.isAbove('sm') ? 250 : 20 }}>
                 <Outlet />
             </Container>
         </div>
     )
 }
 
-const Nav = styled('nav')(() => ({
-    height: '100vh',
-    width: 200,
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    background: '#2164d1',
-    'a': {
-        color: '#fff',
-        display: 'block'
-    }
-} as CSSObject))

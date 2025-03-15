@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Col, Container, Row } from "reactstrap";
+import { Button, Col, Row } from "reactstrap";
 import styled from "@emotion/styled";
 
 import { 
@@ -67,7 +67,7 @@ export default function NoughtsAndCrosses() {
     }
 
     return (
-        <Container className="pt-5">
+        <div className="pt-5">
             <Row className="">
                 <Col xl={6}>
                     {grid.map((row, y) => (
@@ -108,7 +108,7 @@ export default function NoughtsAndCrosses() {
                     )))}
                 </Col>
             </Row>
-        </Container>
+        </div>
     )
 }
 
