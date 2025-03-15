@@ -1,8 +1,9 @@
-import styled from "@emotion/styled";
-import { useGrid } from "../../hooks/grid"
-import { useState } from "react";
-import { getCombos } from "../../utils/gridCombo";
 import { Button } from "reactstrap";
+import styled from "@emotion/styled";
+import { useState } from "react";
+
+import { getCombos } from "@/utils/gridCombo";
+import { useGrid } from "@/hooks/grid"
 
 type GamePiece = 'Red' | 'Yellow';
 

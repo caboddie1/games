@@ -26,7 +26,7 @@ export default function Games() {
 
     return (
         <div>
-            {breakpoint.isAbove('sm') ?
+            {breakpoint.isAbove('md') ?
                 <Nav 
                     links={games}
                 />
@@ -35,7 +35,7 @@ export default function Games() {
                     links={games}
                 />
             }
-            <Container fluid style={{ paddingLeft: breakpoint.isAbove('sm') ? 250 : 20 }}>
+            <Container fluid style={{ paddingLeft: breakpoint.isAbove('md') ? 250 : 10 }}>
                 <Outlet />
             </Container>
         </div>

@@ -1,14 +1,15 @@
 import styled from "@emotion/styled";
+import { Alert } from "reactstrap";
 
 import Highlight from "./Highlight";
 
 import { GridState, HighlightState } from "./WordSearch";
-import { CoordinateObj } from "../../hooks/grid";
-import { Alert } from "reactstrap";
-import { WordState } from "../../utils/wordSearch";
+import { WordState } from "@/utils/wordSearch";
+import { CoordinateObj } from "@/hooks/grid";
 
 interface Props {
     gridState: GridState;
+    gridSize?: number;
     highlightState: HighlightState;
     highlightedWord: string | null;
     isComplete: Boolean;
@@ -18,7 +19,8 @@ interface Props {
 }
 
 export default function Grid({ 
-    gridState, 
+    gridState,
+    gridSize = 30,
     foundState,
     highlightState,
     highlightedWord,
@@ -28,10 +30,11 @@ export default function Grid({
 }: Props) {
 
 
+
     return (
         <div className="position-relative">
             {gridState.grid.map((row, y) => (
-                <div key={y} style={{ height: 30 }}>
+                <div key={y} style={{ height: gridSize }}>
                     {row.map((column, x) => (
                         <Square 
                             key={`row-${y}-column-${x}`}
@@ -39,6 +42,7 @@ export default function Grid({
                             onClick={() => onSquareClick({ x, y })}
                             onMouseOver={() => onSquareHover({ x, y })}
                             aria-label={`y${y}x${x}`}
+                            gridSize={gridSize}
                         >
                             {column}
                         </Square>
@@ -52,14 +56,14 @@ export default function Grid({
                         coords: highlightState.coords.coords.map(r => ({ ...r, letter: '' })),
                         direction: highlightState.coords.direction
                     }}
-                    baseSize={30}
+                    baseSize={gridSize}
                 />
             }
             {foundState.map(row => (
                 <Highlight 
                     key={row.word}
                     wordState={row}
-                    baseSize={30}
+                    baseSize={gridSize}
                 />
             ))}
             <div className="mt-3 w-50">
@@ -84,10 +88,15 @@ export default function Grid({
     )
 }
 
-const Square = styled('button')(() => ({
-    width: 30,
-    height: 30,
+interface SquareProps {
+    gridSize: number;
+}
+
+const Square = styled('button')<SquareProps>(({ gridSize }) => ({
+    width: gridSize, 
+    height: gridSize,
     marginTop: -2,
     marginLeft: -1,
     background: 'none',
+    fontSize: '1rem'
 }));

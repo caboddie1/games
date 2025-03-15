@@ -1,6 +1,7 @@
-import { CoordinateObj, Tuple } from "../hooks/grid";
 import { generate } from "random-words";
-import { GridState } from "../components/WordSearch/WordSearch";
+
+import { CoordinateObj, Tuple } from "@/hooks/grid";
+import { GridState } from "@/components/WordSearch/WordSearch";
 
 export type Direction = 'horizontal' | 'vertical' | 'diagonal-right' | 'diagonal-left';
 
