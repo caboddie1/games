@@ -68,7 +68,7 @@ interface WordSearchConfig {
 export class WordSearch {
     public gridSize: number = 15;
     public wordState: WordState[] = [];
-    public grid: Grid = this.generateGrid();
+    public grid: Grid;
     private numWords: number = 25;
 
     constructor(config?: WordSearchConfig) {
@@ -79,6 +79,7 @@ export class WordSearch {
         if (config?.numWords) {
             this.numWords = config.numWords
         }
+        this.grid = this.generateGrid()
         this.populateGrid();
     }
 
@@ -161,6 +162,7 @@ export class WordSearch {
     }
 
     private generateGrid(): (null | string)[][] {
+        console.log(this.gridSize)
         return Array.from({ length: this.gridSize }, () => {
             return Array.from({ length: this.gridSize }, () => null)
         })
