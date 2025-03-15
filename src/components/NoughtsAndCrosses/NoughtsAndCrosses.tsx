@@ -8,8 +8,8 @@ import {
     Coordinate, 
     GamePiece 
 } from "./types";
-import { useGrid } from "../../hooks/grid";
-import { getCombos } from "../../utils/gridCombo";
+import { useGrid } from "@/hooks/grid";
+import { getCombos } from "@/utils/gridCombo";
 
 const winningCombos = getCombos({ rows: 3, columns: 3, streak: 3 });
 

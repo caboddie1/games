@@ -1,10 +1,16 @@
-import { CoordinateObj, Tuple } from "../../hooks/grid"
-import { HighlightItem, WordState } from "../../utils/wordSearch";
 import { useState } from "react";
 import { Button, Col, Row } from "reactstrap";
+import { useSelector } from "react-redux";
+
 import Grid from "./Grid";
 import WordList from "./WordList";
-import { WordSearch as _WordSearch } from "../../utils/wordSearch";
+
+import { WordSearch as _WordSearch } from "@/utils/wordSearch";
+import { Breakpoint } from "@/utils/breakpoint";
+
+import { CoordinateObj, Tuple } from "@/hooks/grid"
+import { HighlightItem, WordState } from "@/utils/wordSearch";
+import { RootState } from "@/state/store";
 
 export interface GridState {
     grid: Tuple<Tuple<string | null, number>, number>;
@@ -32,6 +38,9 @@ export default function WordSearch() {
     const highlightedWord = highlightState?.coords?.coords.map(({ x, y }) => {
         return gridState.grid[y][x];
     }).join('') || null;
+
+    const breakpointState = useSelector((state: RootState) => state.breakpoint.value);
+    const breakpoint = new Breakpoint(breakpointState);
 
     const isComplete = gridState.words.length === foundState.length;
  
@@ -96,7 +105,11 @@ export default function WordSearch() {
 
     return (
         <Row className="mt-5">
-            <Col xl={6}>
+            <Col 
+                xl={6}
+                sm={10}
+                xs={12}
+            >
                 <Grid 
                     {...{
                         gridState,
@@ -105,15 +118,10 @@ export default function WordSearch() {
                         highlightedWord,
                         isComplete,
                         onSquareClick,
-                        onSquareHover
+                        onSquareHover,
+                        gridSize: breakpoint.isBelow('md') ? 25 : 30
                     }}
                 /> 
-            </Col>
-            <Col xl={4}>
-                <WordList 
-                    gridState={gridState}
-                    getIsFound={getIsFound}
-                />
                 <Button 
                     onClick={() => onResetClick() }
                     color="primary"
@@ -121,6 +129,19 @@ export default function WordSearch() {
                     >
                     Reset
                 </Button>
+            </Col>
+            <Col 
+                xl={4}
+                sm={2}
+                xs={12}
+                
+            >
+                <h5>Words ({foundState.length} of {gridState.words.length})</h5>
+                <WordList 
+                    gridState={gridState}
+                    getIsFound={getIsFound}
+                />
+
             </Col>
         </Row>
     )
