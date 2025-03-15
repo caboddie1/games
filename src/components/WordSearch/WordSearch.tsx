@@ -25,8 +25,22 @@ export interface HighlightState {
 
 export default function WordSearch() {
 
+    const breakpointState = useSelector((state: RootState) => state.breakpoint.value);
+    const breakpoint = new Breakpoint(breakpointState);
+
     function initState() {
-        const wordSearch = new _WordSearch();
+
+        let config = {
+            gridSize: 15,
+            numWords: 25
+        }
+
+        if (breakpoint.isBelow('md')) {
+            config.gridSize = 12;
+            config.numWords = 15;
+        }
+
+        const wordSearch = new _WordSearch(config);
         return wordSearch.getState();
     }
 
@@ -39,8 +53,6 @@ export default function WordSearch() {
         return gridState.grid[y][x];
     }).join('') || null;
 
-    const breakpointState = useSelector((state: RootState) => state.breakpoint.value);
-    const breakpoint = new Breakpoint(breakpointState);
 
     const isComplete = gridState.words.length === foundState.length;
  
@@ -107,7 +119,7 @@ export default function WordSearch() {
         <Row className="mt-5">
             <Col 
                 xl={6}
-                sm={10}
+                sm={8}
                 xs={12}
             >
                 <Grid 
@@ -119,20 +131,20 @@ export default function WordSearch() {
                         isComplete,
                         onSquareClick,
                         onSquareHover,
-                        gridSize: breakpoint.isBelow('md') ? 25 : 30
+                        gridSize: 30
                     }}
                 /> 
                 <Button 
                     onClick={() => onResetClick() }
                     color="primary"
-                    className="mt-3"
-                    >
+                    className="my-3"
+                >
                     Reset
                 </Button>
             </Col>
             <Col 
                 xl={4}
-                sm={2}
+                sm={4}
                 xs={12}
                 
             >
