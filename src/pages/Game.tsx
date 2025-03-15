@@ -32,13 +32,17 @@ export default function Game() {
     const { id } = useParams();
     const game = games.get(id || '');
 
-
     return (
         <div>
             {!game ?
                 <p>Game not Found</p>
             :
-                game.component
+                <>
+                    <h1>
+                        {game.title}
+                    </h1>
+                    {game.component}
+                </>
             }
         </div>
     )
