@@ -1,6 +1,7 @@
 import { Button } from "reactstrap";
-import styled from "@emotion/styled";
+import styled, { CSSObject } from "@emotion/styled";
 import { useState } from "react";
+import { motion } from "motion/react"
 
 import { getCombos } from "@/utils/gridCombo";
 import { useGrid } from "@/hooks/grid"
@@ -69,23 +70,38 @@ export default function ConnectFour() {
     }
 
     return (
-        <div className="mt-5">
-            {grid.map((row, rowI) => (
-                <div key={`row-${rowI}`}>
-                    {row.map((column, columnI) => (
-                        <GridItem 
-                            key={`row-${rowI}-column${columnI}`}
-                            className="border py-1"
-                            onClick={() => win ? null : onItemClick(columnI)}
-                            aria-label={`y${rowI}x${columnI}`}
-                        >
-                            <Circle 
-                                gamePiece={column}
-                            />
-                        </GridItem>
-                    ))}
-                </div>
-            ))}
+        <div 
+            className="mt-5"
+        >
+            <GameWrapper 
+                className="position-relative"
+                height={grid.length * 50}
+            >
+
+                {grid.map((row, rowI) => (
+                    <div key={`row-${rowI}`}>
+                        {row.map((column, columnI) => (
+                            <GridItem 
+                                key={`row-${rowI}-column${columnI}`}
+                                className="border py-1"
+                                onClick={() => win ? null : onItemClick(columnI)}
+                                aria-label={`y${rowI}x${columnI}`}
+                                x={columnI * 50}
+                                y={rowI * 50}
+                            >
+                                <Circle />
+                                {column &&
+                                    <GamePiece
+                                        gamePiece={column}
+                                        initial={{ top: (rowI + 1) * 50 * -1 }}
+                                        animate={{ top: 3 }}
+                                    />
+                                }
+                            </GridItem>
+                        ))}
+                    </div>
+                ))}
+            </GameWrapper>
             <div>
                 {win ?
                     `player ${playerTurn} has won`
@@ -104,25 +120,52 @@ export default function ConnectFour() {
     )
 }
 
-const GridItem = styled('button')(() => ({
+interface GameWrapperProps {
+    height: number;
+}
+
+const GameWrapper = styled('div')<GameWrapperProps>(({ height }) => ({
+    height,
+    marginTop: 50
+}));
+
+interface GridItemProps {
+    x: number;
+    y: number;
+}
+
+const GridItem = styled('button')<GridItemProps>(({ x, y }) => ({
+    position: 'absolute',
     height: 50,
     width: 50,
     background: 'none',
     marginTop: -1,
     marginRight: -1,
-    backgroundColor: 'blue'
+    backgroundColor: 'blue',
+    top: y,
+    zIndex: 3,
+    left: x
+
 }))
 
-interface CircleProps {
-    gamePiece: GamePiece | null;
-}
 
-const Circle = styled('div')<CircleProps>(({ gamePiece }) => ({
+const Circle = styled('div')(() => ({
     borderRadius: '50%',
     background: 'gray',
     width: '100%',
     height: '100%',
-    ...!gamePiece ? {} : {
-        background: gamePiece === 'Red' ? 'red' : 'yellow'
-    }
 }));
+
+interface GamePieceProps {
+    gamePiece: GamePiece | null;
+}
+
+const GamePiece = styled(motion.div)<GamePieceProps>(({ gamePiece }) => ({
+    width: '90%',
+    height: '90%',
+    background: gamePiece === 'Red' ? '#ff4444' : '#ebed52',
+    zIndex: 2,
+    borderRadius: '50%',
+    position: 'absolute',
+    left: '3px'
+} as CSSObject))
