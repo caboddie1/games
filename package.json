@@ -17,6 +17,7 @@
     "@emotion/styled": "^11.14.0",
     "@reduxjs/toolkit": "^2.6.1",
     "bootstrap": "^5.3.3",
+    "motion": "^12.5.0",
     "random-words": "^2.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

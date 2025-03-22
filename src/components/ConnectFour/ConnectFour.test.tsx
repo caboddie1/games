@@ -2,6 +2,7 @@ import { render, waitFor } from '@testing-library/react';
 import ConnectFour from './ConnectFour';
 import userEvent from '@testing-library/user-event';
 
+
 function setup() {
     return render(
         <ConnectFour />
@@ -17,10 +18,11 @@ describe('ConnectFour', () => {
 
         await waitFor(() => {
             expect(getByText('player 2s turn')).toBeInTheDocument();
-        })
+        });
+
 
         await waitFor(() => {
-            expect(getByLabelText('y5x0').children[0]).toHaveStyle({'background': 'red'});
+            expect(getByLabelText('y5x0').children[1]).toHaveStyle({'background': '#ff4444'});
         });
     });
 
