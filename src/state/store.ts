@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import breakpointReducer from './breakpoint/breakpointSlice';
+import snakeReducer from './snake/snakeSlice';
 
 export const store = configureStore({
     reducer: {
-        breakpoint: breakpointReducer
+        breakpoint: breakpointReducer,
+        snake: snakeReducer
     }
 })
 

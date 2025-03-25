@@ -11,7 +11,8 @@ import { RootState } from "@/state/store";
 const gameTitles: string[] = [
     'Noughts and Crosses',
     'Connect 4',
-    'Word Search'
+    'Word Search',
+    'Snake'
 ] 
 
 const games: NavLink[] = gameTitles.map(game => ({
