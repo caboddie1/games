@@ -3,6 +3,8 @@ import { useParams } from "react-router";
 import ConnectFour from "../components/ConnectFour";
 import WordSearch from "../components/WordSearch";
 import Snake from "@/components/Snake";
+import { useAppSelector } from "@/state/hooks";
+import { useEffect } from "react";
 
 const games = new Map([
     [
@@ -39,6 +41,19 @@ export default function Game() {
 
     const { id } = useParams();
     const game = games.get(id || '');
+    const gameMode = useAppSelector(state => state.game.gameMode);
+
+    useEffect(() => {
+        if (gameMode) {
+            document.body.style.overflow = 'Hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+
+        return () => {
+            document.body.style.overflow = 'auto';
+        }
+    }, [gameMode]);
 
     return (
         <div>
@@ -46,9 +61,11 @@ export default function Game() {
                 <p>Game not Found</p>
             :
                 <>
-                    <h1>
-                        {game.title}
-                    </h1>
+                    {!gameMode &&
+                        <h1>
+                            {game.title}
+                        </h1>
+                    }
                     {game.component}
                 </>
             }

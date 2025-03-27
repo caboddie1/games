@@ -36,6 +36,13 @@ export class Breakpoint {
         }
     }
 
+    static getBrowserDimensions() {
+        return {
+            width: window.innerWidth,
+            height: window.innerHeight
+        } 
+    }
+
     private _getIndexes(breakpoint: BreakpointStr): [number, number] {
         const findPredicate = (arr: [BreakpointStr, number], breakpoint: BreakpointStr) => {
             return arr[0] === breakpoint;

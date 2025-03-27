@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { AppDispatch, RootState } from "@/state/store";
-import { updateBreakpoint } from "@/state/breakpoint/breakpointSlice";
+import { updateBreakpoint, updateScreen } from "@/state/breakpoint/breakpointSlice";
 import { Breakpoint } from "@/utils/breakpoint/breakpoint";
 
 export function useBreakpoint() {
@@ -17,6 +17,8 @@ export function useBreakpoint() {
             if (breakpoint !== breakpointState) {
                 dispatch(updateBreakpoint(breakpoint));
             }
+
+            dispatch(updateScreen(Breakpoint.getBrowserDimensions()))
         }
 
         window.addEventListener('resize', onWindowResize);
