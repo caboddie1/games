@@ -1,22 +1,16 @@
-import { motion } from "motion/react";
 import { useEffect, useRef } from "react"
-import { Direction } from "./types";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/state/store";
+import { Direction, PosModifier, Touch } from "./types";
+import { AppDispatch } from "@/state/store";
 import { resetState, updateDirection, updateGameOver, updateHighScore, updatePosition, updatePowerUp, updateScore } from "@/state/snake/snakeSlice";
 import { Button } from "reactstrap";
 import { Breakpoint } from "@/utils/breakpoint";
+import { updateGameMode } from "@/state/game/gameSlice";
+import { useAppDispatch, useAppSelector } from "@/state/hooks";
+import styled, { CSSObject } from "@emotion/styled";
+import { CoordinateObj } from "@/hooks/grid";
+import Grid from "./Grid";
 
 
-
-
-
-type PosModifier = {
-    [key in Direction]: {
-        x: number;
-        y: number;
-    }
-}
 
 const posModifier: PosModifier = {
     up: {
@@ -46,31 +40,24 @@ const codeMap: { [key: string]: Direction } = {
 
 const squareSize: number = 20;
 
-interface Touch {
-    start: {
-        x: number;
-        y: number;
-    }
-    end?: {
-        x: number;
-        y: number;
-    }
-}
+
 
 export default function Snake() {
 
-    const breakpointState = useSelector((state: RootState) => state.breakpoint.value)
+    const breakpointState = useAppSelector(state => state.breakpoint.value)
+    const screen = useAppSelector(state => state.breakpoint.screen);
+    const gameMode = useAppSelector(state => state.game.gameMode);
     const breakpoint = new Breakpoint(breakpointState);
-    const gridSize: number = breakpoint.isBelow('md') ? 20 : 30;
+    const gridSize: number = breakpoint.isBelow('md') ? Math.floor(Math.min(screen.height, screen.width) / 20) - 2 : 30;
 
     const grid = Array.from({ length: gridSize }, () => {
         return Array.from({ length: gridSize }, () => {
-            return null
+            return null;
         })
     });
 
-    const { direction, position, gameOver, powerUp, score, highScore } = useSelector((state: RootState) => state.snake);
-    const dispatch = useDispatch<AppDispatch>();
+    const { direction, position, gameOver, powerUp, score, highScore } = useAppSelector(state => state.snake);
+    const dispatch = useAppDispatch<AppDispatch>();
 
     const posIntervalRef = useRef<NodeJS.Timeout>(null);
     const touchRef = useRef<null | Touch>(null);
@@ -137,14 +124,19 @@ export default function Snake() {
     }
 
     useEffect(() => {
+
+
         if (posIntervalRef.current) {
             clearInterval(posIntervalRef.current)
         }
 
         if (!gameOver) {
+            if (!gameMode) dispatch(updateGameMode(true));
             posIntervalRef.current = setInterval(() => {
                 updateGameState();
             }, 80);
+        } else {
+            if (gameMode) dispatch(updateGameMode(false));
         }
 
         return () => {
@@ -235,62 +227,22 @@ export default function Snake() {
         <div className="text-center">
             {!gameOver ?
                 <>
-                    <div
-                        className="position-relative"
-                        style={{ 
-                            width: squareSize * gridSize,
-                            height: squareSize * gridSize,
-                            border: '5px solid #777',
-                            boxSizing: 'content-box',
-                            margin: '0 auto'
-                        }}
+                    <Grid
+                        squareSize={squareSize}
+                        gridSize={gridSize}
+                        grid={grid}
                     >
-                        {grid.map((row, y) => (
-                            <div key={`y${y}`} className="">
-                                {row.map((_, x) => (
-                                    <div 
-                                        key={`y${y}x${x}`} 
-                                        style={{ 
-                                            width: squareSize, 
-                                            height: squareSize,
-                                            position: 'absolute',
-                                            top: y * squareSize,
-                                            left: x * squareSize
-                                        }}
-                                    >
-
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
                         {position.map((pos) => (
-                            <motion.div 
+                            <SnakeBody 
                                 key={`x${pos.x}y${pos.y}`}
-                                style={{
-                                    borderRadius: 3,
-                                    background: '#777',
-                                    height: squareSize,
-                                    width: squareSize,
-                                    position: 'absolute',
-                                    top: pos.y * squareSize,
-                                    left: pos.x * squareSize,
-                                    paddingLeft: 5,
-                                    paddingRight: 5,
-                                    boxSizing: 'border-box'
-                                }} 
+                                pos={pos}
                             />
                         ))}
-                        <div style={{
-                            top: powerUp.y * squareSize,
-                            left: powerUp.x * squareSize,
-                            width: squareSize,
-                            height: squareSize,
-                            borderRadius: '50%',
-                            backgroundColor: 'blue',
-                            position: 'absolute'
-                        }} />
+                        <PowerUp
+                            pos={powerUp}
+                        />
 
-                    </div>
+                    </Grid>
                     <div>
                         <h5>Score {score}</h5>
                         <h5>High Score {highScore}</h5>
@@ -309,7 +261,35 @@ export default function Snake() {
                     </Button>
                 </div>
             }
-
         </div>
     )
 }
+
+interface SnakeBodyProps {
+    pos: CoordinateObj;
+}
+
+const SnakeBody = styled('div')<SnakeBodyProps>(({ pos }) => ({
+    borderRadius: 3,
+    background: '#777',
+    height: squareSize,
+    width: squareSize,
+    position: 'absolute',
+    top: pos.y * squareSize,
+    left: pos.x * squareSize,
+    paddingLeft: 5,
+    paddingRight: 5,
+    boxSizing: 'border-box'
+} as CSSObject));
+
+interface PowerUpProps extends SnakeBodyProps {}
+
+const PowerUp = styled('div')<PowerUpProps>(({ pos }) => ({
+    top: pos.y * squareSize,
+    left: pos.x * squareSize,
+    width: squareSize,
+    height: squareSize,
+    borderRadius: '50%',
+    backgroundColor: 'blue',
+    position: 'absolute'
+}))

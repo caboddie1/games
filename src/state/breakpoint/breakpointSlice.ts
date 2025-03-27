@@ -4,10 +4,15 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface BreakpointState {
     value: BreakpointStr;
+    screen: {
+        height: number;
+        width: number;
+    }
 }
 
 const initialState: BreakpointState = {
-    value: Breakpoint.getBreakpoint()
+    value: Breakpoint.getBreakpoint(),
+    screen: Breakpoint.getBrowserDimensions()
 }
 
 export const breakpointSlice = createSlice({
@@ -16,10 +21,13 @@ export const breakpointSlice = createSlice({
     reducers: {
         updateBreakpoint: (state, action: PayloadAction<BreakpointStr>) => {
             state.value = action.payload;
+        },
+        updateScreen: (state, action: PayloadAction<BreakpointState['screen']>) => {
+            state.screen = action.payload;
         }
     }
 
 });
 
-export const { updateBreakpoint } = breakpointSlice.actions;
+export const { updateBreakpoint, updateScreen } = breakpointSlice.actions;
 export default breakpointSlice.reducer;
