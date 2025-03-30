@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react"
-import { Direction, PosModifier, Touch } from "./types";
+import { useEffect, useMemo, useRef } from "react"
+import { Direction, PosModifier, Touch, Variant } from "./types";
 import { AppDispatch } from "@/state/store";
-import { resetState, updateDirection, updateGameOver, updateHighScore, updatePosition, updatePowerUp, updateScore } from "@/state/snake/snakeSlice";
+import { resetState, updateDirection, updateGameOver, updateHighScore, updatePosition, updatePowerUp, updateScore, updateSpecialPowerUp } from "@/state/snake/snakeSlice";
 import { Button } from "reactstrap";
 import { Breakpoint } from "@/utils/breakpoint";
 import { updateGameMode } from "@/state/game/gameSlice";
@@ -9,8 +9,6 @@ import { useAppDispatch, useAppSelector } from "@/state/hooks";
 import styled, { CSSObject } from "@emotion/styled";
 import { CoordinateObj } from "@/hooks/grid";
 import Grid from "./Grid";
-
-
 
 const posModifier: PosModifier = {
     up: {
@@ -40,9 +38,11 @@ const codeMap: { [key: string]: Direction } = {
 
 const squareSize: number = 20;
 
+interface Props {
+    variant: Variant;
+}
 
-
-export default function Snake() {
+export default function Snake({ variant }: Props) {
 
     const breakpointState = useAppSelector(state => state.breakpoint.value)
     const screen = useAppSelector(state => state.breakpoint.screen);
@@ -50,19 +50,79 @@ export default function Snake() {
     const breakpoint = new Breakpoint(breakpointState);
     const gridSize: number = breakpoint.isBelow('md') ? Math.floor(Math.min(screen.height, screen.width) / 20) - 2 : 30;
 
-    const grid = Array.from({ length: gridSize }, () => {
+    const grid = useMemo(() => {
         return Array.from({ length: gridSize }, () => {
-            return null;
-        })
-    });
+            return Array.from({ length: gridSize }, () => {
+                return null;
+            })
+        });
+    }, [gridSize]);
 
-    const { direction, position, gameOver, powerUp, score, highScore } = useAppSelector(state => state.snake);
+    const { 
+        direction, 
+        position, 
+        gameOver, 
+        powerUp, 
+        specialPowerUp,
+        score, 
+        highScore, 
+    } = useAppSelector(state => state.snake);
+
     const dispatch = useAppDispatch<AppDispatch>();
 
     const posIntervalRef = useRef<NodeJS.Timeout>(null);
     const touchRef = useRef<null | Touch>(null);
+    const specialPowerUpRef = useRef<NodeJS.Timeout | null>(null);
+
+    function getRandomSpecialPowerUpPos() {
+        const possiblePositions = [ ...Array(gridSize - 1)]
+            .flatMap((_, yIndex) => {
+                const array: CoordinateObj[][] = []
+                
+                let outOfBounds = false;
+                let xIndex = 0;
+
+                while (!outOfBounds) {
+                    if (xIndex >= gridSize - 1 || yIndex >= gridSize - 1) {
+                        outOfBounds = true;
+                        continue;
+                    }
+                    array.push([{
+                        y: yIndex,
+                        x: xIndex
+                    },
+                    {
+                        y: yIndex,
+                        x: xIndex + 1
+                    },
+                    {
+                        y: yIndex + 1,
+                        x: xIndex
+                    },
+                    {
+                        y: yIndex + 1,
+                        x: xIndex + 1
+                    }
+                    ])
+                    xIndex += 1;
+                }
+
+                return array;
+            })
+            .filter(arr => {
+                return !position.some(pos => {
+                    return arr.some(coord => coord.x === pos.x && coord.y === pos.y)
+                })
+            })
+
+
+        const randomNumber = Math.floor(Math.random() * possiblePositions.length);
+
+        return possiblePositions[randomNumber];
+    }
 
     function generateRandPowerUpPos() {
+
         const gridArray = grid
             .flatMap((_, y) => {
                 return grid.map((_, x) => ({
@@ -80,24 +140,60 @@ export default function Snake() {
 
     }
 
+    function hasEatenPowerUp(pos: CoordinateObj) {
+        return pos.x === powerUp.position.x && pos.y === powerUp.position.y;
+    }
+
+    function hasEatenSpecialPowerUp(pos: CoordinateObj) {
+        if (!specialPowerUp.position) return false;
+        return specialPowerUp.position.some((powerUpPos) => {
+            return pos.x === powerUpPos.x && pos.y === powerUpPos.y;
+        })
+    }
+
+    function getSpecialPowerUpTime() {
+        if (specialPowerUp.position && specialPowerUp.unixStartTime) {
+            const currentUnixTime = Date.now();
+
+            const diff = Math.floor((currentUnixTime - specialPowerUp.unixStartTime) / 1000);
+
+            return 10 - diff;
+        }
+    }
+
+    getSpecialPowerUpTime();
+
     function updateGameState() {
 
         const xMod = posModifier[direction].x;
         const yMod = posModifier[direction].y;
         const currentHeadPos = position[position.length - 1];
         const nextHeadPos = {
-            x: currentHeadPos.x + xMod,
-            y: currentHeadPos.y + yMod
+            x: (currentHeadPos.x + xMod) % gridSize,
+            y: (currentHeadPos.y + yMod) % gridSize
         }
 
-        const conditions = [
-            nextHeadPos.x > gridSize - 1, 
+        if (variant === 'Snake II') {
+            if (nextHeadPos.x < 0) {
+                nextHeadPos.x = gridSize - 1;
+            }
+            if (nextHeadPos.y < 0) {
+                nextHeadPos.y = gridSize -1;
+            }
+        }
+        const snakeGameOverConditions = [
+            nextHeadPos.x >= gridSize - 1, 
             nextHeadPos.x < 0, 
-            nextHeadPos.y > gridSize - 1, nextHeadPos.y < 0,
+            nextHeadPos.y >= gridSize - 1, 
+            nextHeadPos.y < 0,
+        ]
+
+        const gameOverConditions = [
+            ...(variant === 'Snake' ? snakeGameOverConditions : []),
             position.some(pos => pos.x === nextHeadPos.x && pos.y === nextHeadPos.y)
         ]
 
-        if (conditions.some(condition => condition)) {
+        if (gameOverConditions.some(condition => condition)) {
             dispatch(updateGameOver(true));
             if (score > highScore) {
                 dispatch(updateHighScore(score));
@@ -107,32 +203,56 @@ export default function Snake() {
 
         let grow = false;
 
-        if (nextHeadPos.x === powerUp.x && nextHeadPos.y === powerUp.y) {
-            dispatch(updateScore());
+        if (hasEatenPowerUp(nextHeadPos)) {
+            dispatch(updateScore(10));
             dispatch(updatePowerUp(generateRandPowerUpPos()));
             grow = true;
+
+            if (variant === 'Snake II' && powerUp.count > 1 && (powerUp.count + 1) % 5 === 0) {
+                const unixStartTime = Date.now();
+                dispatch(updateSpecialPowerUp({
+                    position: getRandomSpecialPowerUpPos(),
+                    unixStartTime
+                }));
+                specialPowerUpRef.current = setTimeout(() => {
+                    dispatch(updateSpecialPowerUp({
+                        position: null,
+                        unixStartTime: null
+                    }));
+                }, 10 * 1000);
+            }
+        }
+
+        if (hasEatenSpecialPowerUp(nextHeadPos)) {
+            dispatch(updateSpecialPowerUp({
+                position: null,
+                unixStartTime: null
+            }));
+            if (specialPowerUpRef.current) {
+                clearTimeout(specialPowerUpRef.current);
+            }
+            const bonusScore = 10 - Math.floor((Date.now() - (specialPowerUp.unixStartTime || 0)) / 1000);
+            dispatch(updateScore( bonusScore * 10 ));
         }
 
         dispatch(updatePosition({
-            pos: {
-                x: xMod,
-                y: yMod
-            },
+            pos: nextHeadPos,
             grow
         }));
 
     }
-
+    const testRef = useRef<number>(1);
     useEffect(() => {
-
 
         if (posIntervalRef.current) {
             clearInterval(posIntervalRef.current)
         }
 
         if (!gameOver) {
+
             if (!gameMode) dispatch(updateGameMode(true));
             posIntervalRef.current = setInterval(() => {
+                testRef.current += 1;
                 updateGameState();
             }, 80);
         } else {
@@ -161,7 +281,10 @@ export default function Snake() {
 
             const newDirection: Direction | undefined = codeMap[key];
 
-            updateSnakeDirection(newDirection)
+            if (newDirection) {
+                updateSnakeDirection(newDirection)
+            }
+
         }
 
         function onTouchStart(e: TouchEvent) {
@@ -227,11 +350,16 @@ export default function Snake() {
         <div className="text-center">
             {!gameOver ?
                 <>
-                    <Grid
-                        squareSize={squareSize}
+                    <GridWrapper 
+                        className="position-relative"
                         gridSize={gridSize}
-                        grid={grid}
                     >
+                        <Grid
+                            squareSize={squareSize}
+                            gridSize={gridSize}
+                            grid={grid}
+                            variant={variant}
+                        />
                         {position.map((pos) => (
                             <SnakeBody 
                                 key={`x${pos.x}y${pos.y}`}
@@ -239,11 +367,27 @@ export default function Snake() {
                             />
                         ))}
                         <PowerUp
-                            pos={powerUp}
+                            pos={powerUp.position}
                         />
-
-                    </Grid>
-                    <div>
+                        {specialPowerUp.position &&
+                            <SpecialPowerUp 
+                                pos={specialPowerUp.position[0]}
+                                type="grid"
+                            />
+                        }
+                    </GridWrapper>
+                    <div className="mt-3">
+                        <div className="d-flex" style={{ justifyContent: 'center', alignItems: 'center'}}>
+                            {specialPowerUp.position &&
+                                <>
+                                    <SpecialPowerUp
+                                        type="display"
+                                        className="me-2"
+                                    />
+                                    <h1>{getSpecialPowerUpTime() || 99}</h1>
+                                </>
+                            }
+                        </div>
                         <h5>Score {score}</h5>
                         <h5>High Score {highScore}</h5>
                     </div>
@@ -265,18 +409,40 @@ export default function Snake() {
     )
 }
 
+interface GridWrapperProps {
+    gridSize: number;
+}
+
+const GridWrapper = styled('div')<GridWrapperProps>(({ gridSize }) => ({
+    width: gridSize * squareSize,
+    height: gridSize * squareSize,
+    margin: '0 auto'
+}));
+
 interface SnakeBodyProps {
     pos: CoordinateObj;
 }
 
+function getPosition({ x, y }: CoordinateObj): CSSObject {
+    return {
+        top: y * squareSize,
+        left: x * squareSize
+    }
+}
+
+function getSize(count: number = 1): CSSObject {
+    return {
+        height: squareSize * count,
+        width: squareSize * count
+    }
+}
+
 const SnakeBody = styled('div')<SnakeBodyProps>(({ pos }) => ({
+    ...getPosition(pos),
+    ...getSize(),
     borderRadius: 3,
     background: '#777',
-    height: squareSize,
-    width: squareSize,
     position: 'absolute',
-    top: pos.y * squareSize,
-    left: pos.x * squareSize,
     paddingLeft: 5,
     paddingRight: 5,
     boxSizing: 'border-box'
@@ -285,11 +451,28 @@ const SnakeBody = styled('div')<SnakeBodyProps>(({ pos }) => ({
 interface PowerUpProps extends SnakeBodyProps {}
 
 const PowerUp = styled('div')<PowerUpProps>(({ pos }) => ({
-    top: pos.y * squareSize,
-    left: pos.x * squareSize,
-    width: squareSize,
-    height: squareSize,
+    ...getPosition(pos),
+    ...getSize(),
     borderRadius: '50%',
     backgroundColor: 'blue',
     position: 'absolute'
 }))
+
+type SpecialPowerUpProps = 
+    | {
+        type: 'grid';
+        pos: CoordinateObj;
+    }
+    | {
+        type: 'display'
+    }
+
+const SpecialPowerUp = styled('div')<SpecialPowerUpProps>((props) => ({
+    ...getSize(2),
+    background: 'green',
+    borderRadius: '50%',
+    ...(props.type === 'display' ? {} : {
+        ...getPosition(props.pos),
+        position: 'absolute'
+    })
+}));

@@ -12,7 +12,8 @@ const gameTitles: string[] = [
     'Noughts and Crosses',
     'Connect 4',
     'Word Search',
-    'Snake'
+    'Snake',
+    'Snake II'
 ] 
 
 const games: NavLink[] = gameTitles.map(game => ({

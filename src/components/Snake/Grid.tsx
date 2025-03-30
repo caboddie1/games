@@ -1,26 +1,28 @@
 import { CoordinateObj } from "@/hooks/grid";
 import styled from "@emotion/styled";
+import { Variant } from "./types";
 import React from "react";
 
 interface Props {
     squareSize: number;
     gridSize: number;
     grid: null[][];
-    children: React.ReactNode;
+    variant: Variant;
 }
 
-export default function Grid({
+function _Grid({
     squareSize,
     gridSize,
     grid,
-    children
+    variant,
 }: Props) {
-
+    console.log('grid render')
     return (
         <Wrapper
             className="position-relative"
             gridSize={gridSize}
             squareSize={squareSize}
+            borderPx={variant === 'Snake' ? 5 : 1}
         >
             {grid.map((row, y) => (
                 <div key={`y${y}`} className="">
@@ -33,19 +35,23 @@ export default function Grid({
                     ))}
                 </div>
             ))}
-            {children}
         </Wrapper>
     )
 }
 
-type WrapperProps = Pick<Props, 'gridSize' | 'squareSize'>;
+const Grid = React.memo(_Grid, () => true);
 
-const Wrapper = styled('div')<WrapperProps>(({ gridSize, squareSize }) => ({
+export default Grid;
+
+type WrapperProps = Pick<Props, 'gridSize' | 'squareSize'> & {
+    borderPx: number;
+};
+
+const Wrapper = styled('div')<WrapperProps>(({ gridSize, squareSize, borderPx }) => ({
     width: squareSize * gridSize,
     height: squareSize * gridSize,
-    border: '5px solid #777',
+    border: `${borderPx}px solid #777`,
     boxSizing: 'content-box',
-    margin: '0 auto'
 }));
 
 type SquareProps = Pick<Props, 'squareSize'> & {
