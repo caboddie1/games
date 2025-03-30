@@ -18,3 +18,5 @@ export interface Touch {
         y: number;
     }
 }
+
+export type Variant = 'Snake' | 'Snake II';

@@ -6,41 +6,60 @@ import Snake from "@/components/Snake";
 import { useAppSelector } from "@/state/hooks";
 import { useEffect } from "react";
 
-const games = new Map([
-    [
-        'noughts-and-crosses', 
-        {
-            title: 'Noughts and Crosses',
-            component: <NaughtsAndCrosses />
-        }
-    ],
-    [
-        'connect-4',
-        {
-            title: 'Connect 4',
-            component: <ConnectFour />
-        }
-    ],
-    [
-        'word-search',
-        {
-            title: 'Word Search',
-            component: <WordSearch />
-        }
-    ],
-    [
-        'snake',
-        {
-            title: 'Snake',
-            component: <Snake />
-        }
-    ]
-])
+
+function getGame(id: string) {
+
+    const games = new Map([
+        [
+            'noughts-and-crosses', 
+            {
+                title: 'Noughts and Crosses',
+                component: <NaughtsAndCrosses key={id} />
+            }
+        ],
+        [
+            'connect-4',
+            {
+                title: 'Connect 4',
+                component: <ConnectFour key={id} />
+            }
+        ],
+        [
+            'word-search',
+            {
+                title: 'Word Search',
+                component: <WordSearch key={id} />
+            }
+        ],
+        [
+            'snake',
+            {
+                title: 'Snake',
+                component: <Snake 
+                    variant="Snake"
+                    key={id}
+                />
+            }
+        ],
+        [
+            'snake-ii',
+            {
+                title: 'Snake II',
+                component: <Snake 
+                    variant="Snake II"
+                    key={id}
+                />
+            }
+        ]
+    ])
+
+    return games.get(id)
+}
 
 export default function Game() {
 
     const { id } = useParams();
-    const game = games.get(id || '');
+    const game = getGame(id || '');
     const gameMode = useAppSelector(state => state.game.gameMode);
 
     useEffect(() => {

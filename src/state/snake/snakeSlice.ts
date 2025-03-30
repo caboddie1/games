@@ -7,7 +7,14 @@ interface State {
     direction: Direction;
     position: CoordinateObj[];
     gameOver: boolean;
-    powerUp: CoordinateObj;
+    powerUp: {
+        position: CoordinateObj;
+        count: number;
+    };
+    specialPowerUp: {
+        position: CoordinateObj[] | null;
+        unixStartTime: number | null;
+    };
     score: number;
     highScore: number;
 }
@@ -24,7 +31,14 @@ const initialState: State = {
         { x: 6, y: 0 },
     ],
     gameOver: false,
-    powerUp: { x: 7, y: 7 },
+    powerUp: {
+        position: { x: 7, y: 7 },
+        count: 0
+    },
+    specialPowerUp: {
+        position: null,
+        unixStartTime: null
+    },
     score: 0,
     highScore: 0
 }
@@ -44,23 +58,28 @@ export const snakeSlice = createSlice({
         updateGameOver: (state, action: PayloadAction<boolean>) => {
             state.gameOver = action.payload;
         },
-        updateScore: (state) => {
-            state.score += 10;
+        updateScore: (state, action: PayloadAction<number>) => {
+            state.score += action.payload;
         },
         updatePowerUp: (state, action: PayloadAction<CoordinateObj>) => {
-            state.powerUp = action.payload;
+            state.powerUp = {
+                position: action.payload,
+                count: state.powerUp.count += 1
+            }
+        },
+        updateSpecialPowerUp: (state, action: PayloadAction<State['specialPowerUp']>) => {
+            state.specialPowerUp = action.payload;
         },
         updateHighScore: (state, action: PayloadAction<number>) => {
             state.highScore = action.payload;
         },
         updatePosition: (state, { payload }: PayloadAction<PositionPayload>) => {
-            const head = state.position[state.position.length -1];
 
             state.position = [
                 ...state.position.slice(payload.grow ? 0 : 1),
                 {
-                    x: head.x + payload.pos.x,
-                    y: head.y + payload.pos.y
+                    x: payload.pos.x,
+                    y: payload.pos.y
                 }
             ]
         },
@@ -81,6 +100,7 @@ export const {
     updatePosition, 
     resetState,
     updatePowerUp,
+    updateSpecialPowerUp,
     updateScore,
     updateHighScore
 } = snakeSlice.actions;
